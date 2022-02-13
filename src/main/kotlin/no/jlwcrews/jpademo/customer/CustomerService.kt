@@ -1,5 +1,6 @@
 package no.jlwcrews.jpademo.customer
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.jlwcrews.jpademo.address.Address
 import no.jlwcrews.jpademo.address.AddressRepo
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +23,7 @@ class CustomerService(
         return customerRepo.findAll()
     }
 
-    fun updateCustomer(customer: Customer): Customer? {
+    fun updateCustomer(customerId: Long, customer: Customer): Customer? {
         if(customerRepo.existsById(customer.customerId)){
             return customerRepo.save(customer)
         }
@@ -39,6 +40,21 @@ class CustomerService(
 
     fun addCustomerAddress(address: Address){
         addressRepo.save(address)
+    }
+
+    fun updateCustomerEmail(customerId: Long, email: String): Boolean {
+
+        customerRepo.findById(customerId).orElse(null)?.let {
+            val newCustomer = Customer(
+                customerId = it.customerId,
+                name = it.name,
+                email = email,
+                created = it.created
+                )
+            customerRepo.save(newCustomer)
+            return true
+        }
+        return false
     }
 
 }

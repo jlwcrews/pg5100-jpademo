@@ -1,17 +1,20 @@
 package no.jlwcrews.jpademo.customer
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import java.security.InvalidParameterException
 
 @RestController
 class CustomerController(@Autowired private val customerService: CustomerService) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @GetMapping("/customers")
+    @GetMapping("/customer")
     fun getCustomers(): List<Customer>? {
         return customerService.getCustomers()
     }
@@ -25,27 +28,37 @@ class CustomerController(@Autowired private val customerService: CustomerService
         throw CustomerNotFound()
     }
 
-    @PostMapping("/customer/create")
+    @PostMapping("/customer")
     fun createCustomer(@RequestBody customer: Customer): Customer? {
         return customerService.createCustomer(customer)
     }
 
-    @PutMapping("/customer/update")
-    fun updateCustomer(@RequestBody customer: Customer?): Customer? {
-        customer?.let { c ->
-             customerService.updateCustomer(c)?.let {
-                 return it
-             }
+    @PutMapping("/customer/{customerId}")
+    fun updateCustomer(@PathVariable customerId: Long?, @RequestBody customer: Customer?): Customer? {
+        when {
+            customerId == null -> throw InvalidParameterException()
+            customer == null -> throw InvalidParameterException()
+            else -> {
+                customerService.updateCustomer(customerId, customer)?.let {
+                    return it
+                }
+                throw CustomerNotFound()
+            }
         }
-        throw CustomerNotFound()
     }
 
-    @DeleteMapping("/customer/delete")
-    fun deleteCustomer(@RequestParam customerId: Long?): Boolean {
+    @PatchMapping("/customer/{customerId}/email")
+    fun updateCustomerEmail(@PathVariable customerId: Long?, @RequestBody email: JsonNode){
         customerId?.let {
-            return customerService.deleteCustomer(it)
+            if (!customerService.updateCustomerEmail(it, email.get("email").asText())) throw CustomerNotFound()
         }
-        return false
+    }
+
+    @DeleteMapping("/customer/{customerId}/delete")
+    fun deleteCustomer(@PathVariable customerId: Long?) {
+        customerId?.let {
+            if (!customerService.deleteCustomer(it)) throw CustomerNotFound()
+        }
     }
 }
 

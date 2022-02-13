@@ -17,7 +17,7 @@ class AddressController(@Autowired private val addressService: AddressService) {
         return addressService.createAddressForCustomer(address)
     }
 
-    @GetMapping("/addresses")
+    @GetMapping("/address")
     fun getAddresses(): List<Address>?{
         return addressService.getAddresses()
     }
