@@ -1,6 +1,5 @@
 package no.jlwcrews.jpademo.customer
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.jlwcrews.jpademo.address.Address
 import no.jlwcrews.jpademo.address.AddressRepo
 import org.springframework.beans.factory.annotation.Autowired
