@@ -21,14 +21,15 @@ class CustomerController(@Autowired private val customerService: CustomerService
     @GetMapping("/customer/{customerId}")
     fun getCustomer(@PathVariable customerId: Long?): Customer? {
         customerId?.let {
-            val customer = customerService.getCustomer(it)
-            if (customer != null) return customer else throw CustomerNotFound()
+            customerService.getCustomer(it)?.let { customer ->
+                return customer
+            }
         }
         throw CustomerNotFound()
     }
 
     @PostMapping("/customer")
-    fun createCustomer(@RequestBody customer: Customer): Customer? {
+    fun createCustomer(@RequestBody customer: Customer): Customer {
         return customerService.createCustomer(customer)
     }
 
@@ -41,9 +42,9 @@ class CustomerController(@Autowired private val customerService: CustomerService
                 customerService.updateCustomer(customerId, customer)?.let {
                     return it
                 }
-                throw CustomerNotFound()
             }
         }
+        throw CustomerNotFound()
     }
 
     @PatchMapping("/customer/{customerId}/email")
